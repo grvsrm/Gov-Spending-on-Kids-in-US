@@ -1,0 +1,120 @@
+---
+title: "TidyTemplate"
+date: 2020-10-26
+output: html_output
+editor_options: 
+  chunk_output_type: console
+---
+
+# TidyTuesday
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE,
+                      warning = FALSE, message = FALSE,
+                      dpi = 180, fig.height = 5, fig.width = 8)
+
+library(tidyverse)
+library(tidytuesdayR)
+library(scales)
+theme_set(theme_light())
+```
+
+# Load the weekly Data
+
+Dowload the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load("2020-09-15")
+kids_raw <- tt$kids
+
+kids_raw %>% 
+    saveRDS("kids_raw.RDS")
+
+# Removing na observations from the raw data
+kids <- kids_raw %>% 
+    drop_na()
+
+# Saving the final clean data for future use
+kids %>% 
+    saveRDS("kids.RDS")
+```
+
+Now, load the clean data
+```{r}
+kids <- read_rds("kids.RDS")
+kids
+
+```
+
+Govt Speding on Elementary Education and Higher Education
+```{r}
+kids_ele_high <- kids %>% 
+    filter(variable %in% c("PK12ed", "highered"))
+
+kids_ele_high %>% 
+    group_by(variable) %>% 
+    summarise(total = sum(inf_adj_perchild))
+    
+```
+
+* Govt has spent ~5 times more on primary/elementary education than higher education in total in last 20 Years
+```{r}
+kids_ele_high %>% 
+    group_by(variable, year) %>% 
+    summarise(total = sum(inf_adj_perchild)) %>% 
+    ggplot(aes(year, total)) +
+    geom_line(aes(color = variable))
+
+```
+
+```{r}
+kids %>% 
+    filter(variable == "unemp") %>% 
+    group_by(year) %>% 
+    summarise(total = sum(inf_adj_perchild)) %>% 
+    ggplot(aes(year, total)) +
+    geom_line(size =1, color = "gray60")
+```
+
+Expenditure on public health and other health
+```{r}
+kids_health <- kids %>% 
+    filter(variable %in% c("pubhealth", "other_health"))
+
+kids_health %>% 
+    group_by(variable, year) %>% 
+    summarise(total = sum(inf_adj_perchild)) %>% 
+    ggplot(aes(year, total)) +
+    geom_line(aes(color = variable))
+        
+```
+
+Other health has a significant expenditure. It also has a constant linear trend which means that expenditure is increasing continuously over years, public health also shows increase bit the slope is almost flat.
+
+Public Expenditure on libraries
+```{r}
+kids %>% 
+    filter(variable == "lib") %>% 
+    group_by(year) %>% 
+    summarise(total = sum(inf_adj_perchild)) %>% 
+    ggplot(aes(year, total)) +
+    geom_line(size =1, color = "gray60")
+```
+
+Public Expenditure on parks and recreational spaces
+```{r}
+kids %>% 
+    filter(variable == "parkrec") %>% 
+    group_by(year) %>% 
+    summarise(total = sum(inf_adj_perchild)) %>% 
+    ggplot(aes(year, total)) +
+    geom_line(size =1, color = "gray60") +
+    labs(title = "Gov Spendings on Parks and Recreational Spaces",
+         x = "",
+         y = "Total Amount in $ per child")
+```
+
+Lets create a shiny app to see these trends in more interactive form
