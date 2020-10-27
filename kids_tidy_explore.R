@@ -68,4 +68,8 @@ kids %>%
          x = "",
          y = "Increase in inflation adjusted spendings per child relative to 1997($)")
     
-
+# Change in 2016 from 1997
+kids %>% 
+    filter(variable == "PK12ed") %>% 
+    group_by(state) %>% 
+    summarise(change = last(inf_adj_perchild)/ first(inf_adj_perchild))
