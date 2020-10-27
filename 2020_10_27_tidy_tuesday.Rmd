@@ -33,9 +33,38 @@ kids_raw <- tt$kids
 kids_raw %>% 
     saveRDS("kids_raw.RDS")
 
+kids_raw <- read_rds("kids_raw.RDS")
+
+variable_choice <- kids %>% 
+    distinct(variable) %>% 
+    bind_cols(var_name = c("elementary and secondary education",
+                           "higher education",
+                           "education subsidies",
+                           "education special services",
+                           "Pell Grants",
+                           "Federal Head Start",
+                           "TANF",
+                           "other cash assistance",
+                           "SNAP benefit",
+                           "Social Security",
+                           "SSI payments",
+                           "EITC",
+                           "Child Tax Credit",
+                           "Additional Child Tax credit",
+                           "State_EITC",
+                           "Unemployment Compensation",
+                           "Workers Compensation",
+                           "Medicaid_CHIP",
+                           "public health",
+                           "Other health",
+                           "housing and community development",
+                           "libraries",
+                           "parks and recreation"))
+
 # Removing na observations from the raw data
 kids <- kids_raw %>% 
-    drop_na()
+    drop_na() %>% 
+    inner_join(variable_choice)
 
 # Saving the final clean data for future use
 kids %>% 
@@ -118,3 +147,17 @@ kids %>%
 ```
 
 Lets create a shiny app to see these trends in more interactive form
+Plot for shiny app
+```{r}
+kids %>% 
+    filter(variable == "parkrec",
+           state == "Alabama") %>%
+    group_by(year) %>% 
+    summarise(total = sum(inf_adj_perchild)) %>% 
+    ggplot(aes(year, total)) +
+    geom_line(size =1, color = "gray60") +
+    labs(title = "Gov Spendings on Parks and Recreational Spaces",
+         x = "",
+         y = "Total Amount in $ per child")
+```
+
