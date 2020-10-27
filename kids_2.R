@@ -16,11 +16,16 @@ kids_ts <- kids %>%
                index = year)
 
 # Visualising random time plots
-kids_ts %>% 
-    filter(variable == "PK12ed",
-           state %in% sample(unique(state), 10)) %>% 
-    autoplot(inf_adj_perchild)
-
+kids_ts %>%
+    filter(variable == "addCC") %>%
+    autoplot(1000 *inf_adj_perchild, show.legend = F, size = 1) +
+    facet_wrap( ~ state) +
+    theme_tufte() +
+    geom_vline(xintercept = 2009, lty = 2, color = "gray60") +
+    scale_y_continuous(labels = dollar_format(), breaks = c(0:2)) +
+    labs(title = "Government Spendings on Elementary & Primary Education",
+         x = "",
+         y = "Amount in $ (Inf adj per child)")
 
 kids_ts %>% 
     filter(variable == "PK12ed",
